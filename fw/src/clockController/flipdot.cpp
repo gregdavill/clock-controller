@@ -12,7 +12,11 @@ flipdot::flipdot(uint16_t w, uint16_t h)
 	PORT->Group[0].DIRSET.reg	 = (1 << 22);
 
 	PORT->Group[0].DIRSET.reg = (1 << 27);
-	PORT->Group[0].OUTSET.reg = (1 << 27);
+	PORT->Group[0].OUTCLR.reg = (1 << 27);
+
+	
+	PORT->Group[0].DIRSET.reg = (1 << 2);
+	PORT->Group[0].OUTCLR.reg = (1 << 2);
 
 	/* Enable Power */
 	PM->APBCMASK.bit.SERCOM1_ = 1;
@@ -75,6 +79,15 @@ inline void transmit(unsigned char i)
 
 void flipdot::TransmitBuffer()
 {
+	PORT->Group[0].OUTSET.reg = (1 << 27);
+	PORT->Group[0].OUTSET.reg = (1 << 2);
+
+	int i = 3000;
+	while(--i)
+	{
+		asm("nop");
+	}
+
 	transmit(0x80);
 	transmit(0x83);
 	transmit(0xFF);
@@ -86,4 +99,16 @@ void flipdot::TransmitBuffer()
 		}
 	}
 	transmit(0x8F);
+	
+	while (SERCOM1->USART.INTFLAG.bit.DRE == 0) {
+	}
+
+	i = 3000;
+	while(--i)
+	{
+		asm("nop");
+	}
+	
+	PORT->Group[0].OUTCLR.reg = (1 << 27);
+	PORT->Group[0].OUTCLR.reg = (1 << 2);
 }
